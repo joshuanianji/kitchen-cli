@@ -73,6 +73,7 @@ fn main() {
             println!("build status: {}", built.status);
 
             // run binary
+            println!("about to execute binary {}", name);
             let mut execute_binary = Command::new(format!("./target/debug/{}", name));
             let output = execute_binary.output().expect("Failed to run binary");
             println!("status: {}", output.status);
