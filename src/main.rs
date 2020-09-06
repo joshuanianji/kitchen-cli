@@ -42,6 +42,7 @@ fn main() {
     let cargo_contents = fs::read_to_string("Cargo.toml")
         .expect("Could not read Cargo.toml! Is this a rust folder?");
 
+    // the name of the folder
     let mut name: String = String::new();
 
     for line in cargo_contents.lines() {
@@ -52,11 +53,30 @@ fn main() {
                 .map(|x| x.to_string())
                 .collect::<Vec<String>>()
                 .get(1)
-                .expect("Couldn't read name of the folder!")
+                .expect("Couldn't find the name of the folder you're in!")
                 .clone();
         }
     }
 
+    // DEBUG - making sure I read the commands right
     println!("Kitchen is called {}", name);
     println!("Cmd is {:?}", args.cmd);
+
+    match args.cmd {
+        Cmd::Cook => {
+            // run cargo build
+            let mut cargo_cmd = Command::new("cargo");
+            let built = cargo_cmd
+                .arg("build")
+                .output()
+                .expect("failed to build project!");
+            println!("build status: {}", built.status);
+
+            // run binary
+            let mut execute_binary = Command::new(format!("./target/debug/{}", name));
+            let output = execute_binary.output().expect("Failed to run binary");
+            println!("status: {}", output.status);
+        }
+        Cmd::Cleanup => {}
+    }
 }
