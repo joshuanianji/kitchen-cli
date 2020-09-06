@@ -2,6 +2,7 @@
 name = "kitchen"
 version = "0.1.0"
 authors = ["Joshua Ji <joshuanianji@users.noreply.github.com>"]
+license = "MIT OR Apache-2.0"
 description = "A tool for single-file Rust programs"
 readme = "README.md"
 repository = "https://github.com/joshuanianji/kitchen"
