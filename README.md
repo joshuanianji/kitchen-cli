@@ -12,7 +12,7 @@ Kitchen is a simple Rust CLI tool that aims to automate some of the tasks needed
 
 ## Why
 
-As a novice in the Rust programming language, I find myself learning primarily through programming problems. These solutions can almost always fit on a single file, but what options are there to simply run a single rust file? 
+As a novice in the Rust programming language, I find myself learning primarily through programming problems. These solutions can almost always fit on a single file, so what choices are there to simply run a single rust file? 
 
 `rustc` is a good option but it **fails** when it using packages such as the random module, giving an `unresolved import` error when you're not on `main.rs`.
 
