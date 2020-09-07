@@ -63,6 +63,7 @@ dependencies = [
 name = "kitchen"
 version = "0.1.1"
 dependencies = [
+ "question",
  "structopt",
 ]
 
@@ -110,6 +111,12 @@ checksum = "175c513d55719db99da20232b06cda8bab6b83ec2d04e3283edf0213c37c1a29"
 dependencies = [
  "unicode-xid",
 ]
+
+[[package]]
+name = "question"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "acbb3ede7a8f9a8ab89e714637f2cf40001b58f21340d4242b2f11533e65fa8d"
 
 [[package]]
 name = "quote"

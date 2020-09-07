@@ -1,8 +1,14 @@
 use std::fmt;
-use std::path::Path;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::BufReader;
+use std::process::exit;
 use std::process::Command;
 use std::str::FromStr;
 use structopt::StructOpt;
+extern crate question;
+use question::Answer;
+use question::Question;
 
 #[derive(StructOpt)]
 struct Cli {
@@ -46,26 +52,57 @@ fn main() {
                 args.path
             );
 
-            // Check if it's a Rust folder (containing Cargo.toml)
-            if Path::new(&format!("{}/Cargo.toml", args.path)).exists() {
-                // copy the `main.rs` file to a `{folder}.rs` file
-                let copy = Command::new("cp")
-                    .arg(format!("{}/src/main.rs", args.path))
-                    .arg(format!("{}.rs", args.path))
-                    .output()
-                    .expect("Couldn't main.rs file!");
+            // Read Cargo.toml (for dependencies and stuff)
+            let file = File::open(&format!("{}/Cargo.toml", args.path))
+                .expect("Kitchen couldn't find a Cargo.toml file, and thus couldn't determine whether or not it's a Rust folder. Evacuating...");
+            let mut buf_reader = BufReader::new(file);
+            let mut contents = String::new();
+            buf_reader
+                .read_to_string(&mut contents)
+                .expect("Couldn't load content of Cargo.toml!");
 
-                // delete everything in the folder
-                let rm = Command::new("rm")
-                    .arg("-rf")
-                    .arg(args.path)
-                    .output()
-                    .expect("Couldn't delete folder!");
+            let mut dependencies: Vec<String> = Vec::new();
+            let mut at_dependencis = false;
 
-                println!("pog?")
-            } else {
-                println!("Kitchen couldn't find a Cargo.toml file, and thus couldn't determine whether or not it's a Rust folder. Evacuating...")
+            // Read through Cargo.toml and look at dependencies
+            for line in contents.lines() {
+                if at_dependencis {
+                    println!("Dependency found! '{}'", line);
+                    dependencies.push(line.to_string());
+                } else {
+                    if line == "[dependencies]" {
+                        at_dependencis = true;
+                    }
+                }
             }
+
+            // Warns user that there are external dependencies
+            if dependencies.len() > 0 {
+                let answer: Answer = 
+                    Question::new("It looks like there are external dependencies in your program. Would you like to continue with the cleanup?").default(Answer::YES).confirm();
+                
+                // Exits the program completely
+                if let Answer::NO = answer {
+                    eprintln!("Shutting down...");
+                    exit(1);
+                }
+            }
+
+            // copy the `main.rs` file to a `{folder}.rs` file
+            let _copy = Command::new("cp")
+                .arg(format!("{}/src/main.rs", args.path))
+                .arg(format!("{}.rs", args.path))
+                .output()
+                .expect("Couldn't main.rs file!");
+
+            // delete everything in the folder
+            let _rm = Command::new("rm")
+                .arg("-rf")
+                .arg(args.path)
+                .output()
+                .expect("Couldn't delete folder!");
+
+            println!("Cleanup finished!")
         }
         Cmd::Create => println!("Create!"),
     }
