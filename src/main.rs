@@ -12,8 +12,11 @@ use std::fs::OpenOptions;
 use question::Question;
 
 #[derive(StructOpt)]
+#[structopt(about = "A simple Rust CLI for simple Rust apps!")]
 struct Cli {
+    #[structopt(help = "Either a `cleanup` or a `create`")]
     cmd: Cmd,
+    #[structopt(help = "The path to the folder or file you want to run the command on.")]
     path: String,
 }
 
