@@ -80,7 +80,7 @@ fn main() {
             // Warns user that there are external dependencies
             if dependencies.len() > 0 {
                 let answer: Answer = 
-                    Question::new("It looks like there are external dependencies in your program. Would you like to add dependency comments? These will help `kitchen create` if you choose to execute them later on. [y/n]").default(Answer::YES).confirm();
+                    Question::new("It looks like there are external dependencies in your program. Would you like to add dependency comments? These will help `kitchen create` if you choose to execute them later on. [Y/n]").default(Answer::YES).confirm();
                 
                 // Exits the program completely
                 if let Answer::NO = answer {
@@ -115,8 +115,30 @@ fn main() {
                 .output()
                 .expect("Couldn't delete folder!");
 
-            println!("Cleanup finished!")
+            println!("Cleanup finished!");
         }
-        Cmd::Create => println!("Create!"),
+        Cmd::Create => {
+            // if the input is "apples.rs", we'll get "apples"
+            let proj_name: &str = args.path.split(".").next().unwrap();
+            let proj_file: &str = &(proj_name.to_owned() + ".rs");
+
+            println!("Creating cargo project from {}.rs...", proj_name);
+
+            let _build = Command::new("cargo")
+                .arg("new")
+                .arg(proj_name)
+                .output()
+                .expect("Couldn't build project!");
+            
+            // copy contents of "{path}.rs" to "main.rs"
+            let _mv = Command::new("mv")
+                .arg(proj_file)
+                .arg(&format!("{}/src/main.rs", proj_name))
+                .output()
+                .expect(&format!("Couldn't move contents of {}!", proj_file));
+            
+            // delete "{path}.rs"
+            let _rm = Command::new("rm").arg(proj_file).output().expect(&format!("Couldn't delete {}!", proj_file));
+        },
     }
 }
