@@ -51,10 +51,10 @@ fn main() {
 
     match args.cmd {
         Cmd::Cleanup => {
-            println!(
-                "Path to Cargo.toml is suggested to be: {}/Cargo.toml",
-                args.path
-            );
+            println!("Cleaning up folder inside {}...", args.path);
+
+            // status
+            println!("Reading Cargo.toml file for possible dependeicies:");
 
             // Read Cargo.toml (for dependencies and stuff)
             let file = File::open(&format!("{}/Cargo.toml", args.path))
@@ -83,28 +83,29 @@ fn main() {
             // Warns user that there are external dependencies
             if dependencies.len() > 0 {
                 let answer: Answer = 
-                    Question::new("It looks like there are external dependencies in your program. Would you like to add dependency comments? These will help `kitchen create` if you choose to execute them later on. [Y/n]").default(Answer::YES).confirm();
+                    Question::new("Dependencies found! Would you like to add dependency comments? These will help `kitchen create` if you choose to execute them later on. [Y/n]").default(Answer::YES).confirm();
                 
                 // Exits the program completely
-                if let Answer::NO = answer {
-                    eprintln!("Shutting down...");
-                    exit(1);
-                }
+                if let Answer::YES = answer {
+                     // status
+                    println!("Adding dependency comments:");
 
-                // add comments to main file
-                let main_file_name = &format!("{}/src/main.rs", args.path);
-                let mut file = OpenOptions::new().append(true).open(main_file_name).expect("Couldn't open file!");
+                    // add comments to main file
+                    let main_file_name = &format!("{}/src/main.rs", args.path);
+                    let mut file = OpenOptions::new().append(true).open(main_file_name).expect("Couldn't open file!");
 
-                // header
-                write!(&mut file, "\n// KITCHEN DEPENDENCIES \n// These comments were generated automatically. Please do not tamper.").expect("Couldn't write comments to main.rs!");
+                    // header
+                    write!(&mut file, "\n// KITCHEN DEPENDENCIES \n// These comments were generated automatically. Please do not tamper.").expect("Couldn't write comments to main.rs!");
 
-                // add dependencies
-                for dependency in dependencies {
-                    write!(&mut file, "\n// {}", dependency).expect(&format!("Couldn't write {} to main.rs!", dependency));
+                    // add dependencies
+                    for dependency in dependencies {
+                        write!(&mut file, "\n// {}", dependency).expect(&format!("Couldn't write {} to main.rs!", dependency));
+                    }
                 }
             }
 
             // copy the `main.rs` file to a `{folder}.rs` file
+            println!("Copying {}/src/main.rs...", args.path);
             let _copy = Command::new("cp")
                 .arg(format!("{}/src/main.rs", args.path))
                 .arg(format!("{}.rs", args.path))
@@ -112,6 +113,7 @@ fn main() {
                 .expect("Couldn't main.rs file!");
 
             // delete everything in the folder
+            println!("Deleting folder...");
             let _rm = Command::new("rm")
                 .arg("-rf")
                 .arg(args.path)
