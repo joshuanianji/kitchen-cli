@@ -8,6 +8,7 @@ use std::str::FromStr;
 use structopt::StructOpt;
 extern crate question;
 use question::Answer;
+use std::fs::OpenOptions;
 use question::Question;
 
 #[derive(StructOpt)]
@@ -79,12 +80,24 @@ fn main() {
             // Warns user that there are external dependencies
             if dependencies.len() > 0 {
                 let answer: Answer = 
-                    Question::new("It looks like there are external dependencies in your program. Would you like to continue with the cleanup?").default(Answer::YES).confirm();
+                    Question::new("It looks like there are external dependencies in your program. Would you like to add dependency comments? These will help `kitchen create` if you choose to execute them later on. [y/n]").default(Answer::YES).confirm();
                 
                 // Exits the program completely
                 if let Answer::NO = answer {
                     eprintln!("Shutting down...");
                     exit(1);
+                }
+
+                // add comments to main file
+                let main_file_name = &format!("{}/src/main.rs", args.path);
+                let mut file = OpenOptions::new().append(true).open(main_file_name).expect("Couldn't open file!");
+
+                // header
+                write!(&mut file, "\n// KITCHEN DEPENDENCIES \n// These comments were generated automatically. Please do not tamper.").expect("Couldn't write comments to main.rs!");
+
+                // add dependencies
+                for dependency in dependencies {
+                    write!(&mut file, "\n// {}", dependency).expect(&format!("Couldn't write {} to main.rs!", dependency));
                 }
             }
 
