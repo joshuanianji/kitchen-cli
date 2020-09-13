@@ -160,14 +160,6 @@ fn main() {
                 }
             }
 
-            // copy contents of "{path}.rs" to "main.rs"
-            println!("Copying contents into folder...");
-            let _mv = Command::new("mv")
-                .arg(proj_file)
-                .arg(&format!("{}/src/main.rs", proj_name))
-                .output()
-                .expect(&format!("Couldn't move contents of {}!", proj_file));
-
             // delete "{path}.rs"
             println!("Deleting original file...");
             let _rm = Command::new("rm").arg(proj_file).output().expect(&format!("Couldn't delete {}!", proj_file));
