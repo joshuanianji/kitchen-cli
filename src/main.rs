@@ -1,14 +1,13 @@
-use std::fmt;
-use std::fs::File;
-use std::io::prelude::*;
-use std::io::BufReader;
-use std::process::exit;
-use std::process::Command;
-use std::str::FromStr;
+use std::{
+    fmt,
+    fs::{self, OpenOptions, File},
+    io::{prelude::*,BufReader},
+    process::Command,
+    str::FromStr,
+};
 use structopt::StructOpt;
 extern crate question;
 use question::Answer;
-use std::fs::OpenOptions;
 use question::Question;
 
 #[derive(StructOpt)]
@@ -71,8 +70,11 @@ fn main() {
             // Read through Cargo.toml and look at dependencies
             for line in contents.lines() {
                 if at_dependencis {
-                    println!("Dependency found! '{}'", line);
-                    dependencies.push(line.to_string());
+                    if !(line.to_string().trim().len() == 0) {
+                        // newline, ignore
+                        println!("Dependency found! '{}'", line);
+                        dependencies.push(line.to_string());
+                    }
                 } else {
                     if line == "[dependencies]" {
                         at_dependencis = true;
@@ -123,7 +125,8 @@ fn main() {
             println!("Cleanup finished!");
         }
         Cmd::Create => {
-            // if the input is "apples.rs", we'll get "apples"
+            // if the input is "apples.rs", proj_name will be "apples"
+            // this is to make sure we don't fail if the user inputs the file name without the '.rs' ending.
             let proj_name: &str = args.path.split(".").next().unwrap();
             let proj_file: &str = &(proj_name.to_owned() + ".rs");
 
@@ -135,15 +138,66 @@ fn main() {
                 .output()
                 .expect("Couldn't build project!");
             
+            // reading kitchen dependencies
+            println!("Reading Kitchen dependencies...");
+            let mut dependencies: Vec<String> = Vec::new();
+            let file = File::open(proj_file).expect("Couldn't open file!");
+            let reader = BufReader::new(file);
+            let mut at_dependencies = false;
+
+            // this is memory intensive IF the file is too big. 
+            for line in reader.lines() {
+                // removing the Result (though it's probably a pretty bad way to do it)
+                let str_line = line.expect("Couldn't read line!");
+                if at_dependencies {
+                    // push dependencies to vec.
+                    dependencies.push(str_line.replace("//", "").trim().to_string());
+                } else {
+                    // Look for the comment
+                    if str_line.trim() == "// These comments were generated automatically. Please do not tamper." {
+                        at_dependencies = true;
+                    }
+                }
+            }
+
             // copy contents of "{path}.rs" to "main.rs"
+            println!("Copying contents into folder...");
             let _mv = Command::new("mv")
                 .arg(proj_file)
                 .arg(&format!("{}/src/main.rs", proj_name))
                 .output()
                 .expect(&format!("Couldn't move contents of {}!", proj_file));
-            
+
             // delete "{path}.rs"
+            println!("Deleting original file...");
             let _rm = Command::new("rm").arg(proj_file).output().expect(&format!("Couldn't delete {}!", proj_file));
-        },
+
+            // THIS CODE IS HORRIBLE I HATE ITTTTT
+
+            // remove kitchen dependencies from end of main.rs 
+            println!("Removing Kitchen dependencies from main.rs...");
+            let main_file_contents = fs::read_to_string(&format!("{}/src/main.rs", proj_name)).expect("Can't read main.rs!");
+            let lines: Vec<_> = main_file_contents.lines().collect();
+
+            // create will overrite the file
+            let mut file = File::create(&format!("{}/src/main.rs", proj_name)).expect("Can't read main.rs!");
+            for line in lines {
+                if line.trim() == "// KITCHEN DEPENDENCIES" {
+                    // break loop when we find this
+                    break;
+                }
+                writeln!(file, "{}", line).expect("Can't write to Main.rs!");
+            }
+
+            // add dependencies to Cargo.toml
+            println!("Adding dependencies to Cargo.toml...");
+            let cargo_toml = &format!("{}/Cargo.toml", proj_name);
+            let mut file = OpenOptions::new().append(true).open(cargo_toml).expect("Couldn't open Cargo.toml!");
+            // write to Cargo.toml
+            for dependency in dependencies {
+                write!(&mut file, "\n{}", dependency).expect(&format!("Couldn't write {} to Cargo.toml!", dependency));
+            }
+            println!("Kitchen create complete!")
+        }
     }
 }
