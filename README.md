@@ -1,6 +1,12 @@
 # Kitchen
 
-A simple Rust CLI for simple Rust programs. (A work in progress!)
+A simple Rust CLI for simple Rust programs.
+
+## Installation
+
+It's easiest to install by cargo.
+
+`cargo install kitchen`
 
 ## What
 
@@ -8,7 +14,6 @@ Kitchen is a simple Rust CLI tool that aims to automate some of the tasks needed
 
 - `kitchen cleanup {foldername}` replaces your entire folder with `main.rs` renamed to the folder name. Used when you finish the problem and just want to store the code. 
 - `kitchen create {filename}` turns the `{filename.rs}` back into a full blown project! 
-
 
 ## Why
 
