@@ -19,7 +19,7 @@ Kitchen is a simple Rust CLI tool that aims to automate some of the tasks needed
 
 As a novice in the Rust programming language, I find myself learning primarily through short programming problems. These solutions can almost always fit on a single file, so what choices are there to simply run a single rust file? 
 
-`rustc` is a good option but it **fails** when it using dependencies such as the random module, giving an `unresolved import` error when you're not on `main.rs`.
+`rustc` and `cargo run` is a good option but it **fails** when it using dependencies such as the random module, giving an `unresolved import` error when you're not on `main.rs`.
 
 `cargo new` is the default, but they make an entire folder to store a single file! It is overkill when you just want to store the code once you finish. Deleting and renaming files to solve this over and over again gets really annoying.
 
