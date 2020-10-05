@@ -10,14 +10,14 @@ It's easiest to install by cargo.
 
 ## What
 
-Kitchen is a simple Rust CLI tool that aims to automate some of the tasks needed to run single file Rust applications built by `cargo new`. Right now, I plan on making 2 commands:
+Kitchen is a simple Rust CLI tool that aims to automate some of the tasks needed to run single file Rust applications built by `cargo new`. Right now, there are two commands.
 
-- `kitchen cleanup {foldername}` replaces your entire folder with `main.rs` renamed to the folder name. Used when you finish the problem and just want to store the code. 
-- `kitchen create {filename}` turns the `{filename.rs}` back into a full blown project! 
+- `kitchen cleanup {foldername}` replaces your entire folder with `{foldername}.rs`, with the contents of the `src/main.rs`.
+- `kitchen create {filename}` turns the `{filename.rs}` back into the project! 
 
 ## Why
 
-As a novice in the Rust programming language, I find myself learning primarily through programming problems. These solutions can almost always fit on a single file, so what choices are there to simply run a single rust file? 
+As a novice in the Rust programming language, I find myself learning primarily through short programming problems. These solutions can almost always fit on a single file, so what choices are there to simply run a single rust file? 
 
 `rustc` is a good option but it **fails** when it using dependencies such as the random module, giving an `unresolved import` error when you're not on `main.rs`.
 
