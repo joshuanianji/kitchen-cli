@@ -1,4 +1,4 @@
-# Kitchen
+# Kitchen-CLI
 
 A simple Rust CLI for simple Rust programs.
 
